@@ -1,0 +1,55 @@
+import static groovy.io.FileType.FILES
+
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'org.sonarqube' version '3.0'
+    id 'com.palantir.docker-compose' version '0.25.0'
+}
+
+group 'com.dev'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+apply plugin: 'jacoco'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'org.mockito:mockito-core:2.7.22'
+}
+
+
+//convenience task to search for missing unit test classes
+task findMissingTests doLast {
+    def testNames = [];
+    def testdir = new File(rootProject.rootDir.getAbsolutePath() + "/src/test/java")
+    testdir.traverse(type: FILES) {
+        def name = it.name
+        testNames.add(name.substring(0, name.lastIndexOf('.')))
+    }
+
+    def dir = new File(rootProject.rootDir.getAbsolutePath() + "/src/main/java/server")
+    dir.traverse(type: FILES) {
+        def name = it.name
+        def className = name.substring(0, name.lastIndexOf('.'))
+        if (!testNames.contains(className + "Test")) {
+            if(!className.contains("Interface")){
+                println "class has no test: " + className
+            }
+        }
+    }
+}
+
+sonarqube {
+    properties {
+        property 'sonar.host.url', 'http://localhost:9000'
+    }
+}
+
+tasks['sonarqube'].dependsOn test
+
