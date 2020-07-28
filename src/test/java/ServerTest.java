@@ -63,7 +63,7 @@ public class ServerTest {
             throws Unnecessary stubbings detected in test class: ServerTest message
             at the moment as the tests for Server are incomplete
             * */
-            when(serverSocket.accept()).thenReturn(clientA);
+//            when(serverSocket.accept()).thenReturn(clientA);
 
 
         } catch (IOException e) {
